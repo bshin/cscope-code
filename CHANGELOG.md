@@ -13,6 +13,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Added
 - Add setting `Clear Tree View` for clearing historical results in TreeView
+- Add the command to clear results of Tree View ([issue #23](https://github.com/SeungukShin/cscope-code/issues/23))
 
 ## [0.0.7]
 ### Fixed

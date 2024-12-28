@@ -105,6 +105,10 @@
 			{
 				"command": "cscope-code:pop",
 				"title": "Cscope Code: Pop"
+			},
+			{
+				"command": "cscope-code:clear",
+				"title": "Cscope Code: Clear"
 			}
 		],
 		"keybindings": [

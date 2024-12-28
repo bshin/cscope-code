@@ -58,6 +58,12 @@ export default interface IFileTreeData extends vscode.TreeDataProvider<IFileTree
 	reload(items: IItem[], word: string, cwd: string, cmd: string): void;
 
 	/**
+	 * Clear results
+	 * @returns {void}
+	 */
+	clear(): void;
+
+	/**
 	 * Dispose
 	 * @returns {void}
 	 */

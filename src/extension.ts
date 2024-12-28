@@ -110,6 +110,7 @@ export class CscopeCode implements vscode.Disposable {
 		this.subscriptions.push(vscode.commands.registerCommand("cscope-code:show-results", () => this.showResults()));
 		this.subscriptions.push(vscode.commands.registerCommand("cscope-code:pop", () => this.pop()));
 		this.subscriptions.push(vscode.commands.registerCommand('cscope-code:go', (uri, range) => this.go(uri, range)));
+		this.subscriptions.push(vscode.commands.registerCommand('cscope-code:clear', () => this.treeView?.clear()));
 	}
 
 	/**

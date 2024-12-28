@@ -205,6 +205,11 @@ export default class FileTreeData implements IFileTreeData {
 		this.treeView.reveal(firstItems[0]);
 	}
 
+	clear(): void {
+		this.items.clear();
+		this._onDidChangeTreeData.fire(undefined);
+	}
+
 	dispose(): void {
 		this.treeView.dispose();
 	}
