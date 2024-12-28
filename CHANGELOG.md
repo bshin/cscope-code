@@ -4,7 +4,7 @@ All notable changes to the "cscope-code" extension will be documented in this fi
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
+## [0.0.8]
 ### Fixed
 - Limit number of process to build the cscope database ([issue #18](https://github.com/SeungukShin/cscope-code/issues/18))
 
