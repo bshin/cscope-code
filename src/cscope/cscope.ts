@@ -18,6 +18,12 @@ const QueryType: { [key: string]: string } = Object.freeze({
 	'set': '-8'
 });
 
+function promiseState(p: Promise<any>): Promise<string> {
+	const t = {};
+	return Promise.race([p, t])
+		.then(v => (v === t) ? 'pending' : 'fulfilled', () => 'rejected');
+}
+
 export default class Cscope {
 	/**
 	 * @property {IConfig} config
@@ -31,6 +37,7 @@ export default class Cscope {
 	private env: IEnv;
 	private buildCmd: string;
 	private queryCmd: string;
+	private buildQueue: Promise<string>[];
 
 	/**
 	 * @constructor
@@ -44,6 +51,10 @@ export default class Cscope {
 		this.env = env;
 		this.buildCmd = '';
 		this.queryCmd = '';
+		this.buildQueue = [
+			Promise.resolve(''),
+			Promise.resolve('')
+		];
 	}
 
 	/**
@@ -51,39 +62,59 @@ export default class Cscope {
 	 * @returns {Promise<string>}
 	 */
 	async build(cwd: string): Promise<string> {
-		return new Promise((resolve, reject) => {
-			const cmd = this.config.get<string>('cscope');
-			const db = this.config.get<string>('database');
-			const buildArgs = this.config.get<string>('buildArgs');
-			const args = [buildArgs, '-f', db];
-			this.buildCmd = [cmd, ...args].join(' ');
-			this.log.info(cmd, args, cwd);
+		let index = 0;
+		const len = this.buildQueue.length;
+		for (index = 0; index < len; index++) {
+			const state = await promiseState(this.buildQueue[index]);
+			this.log.info('queue state', index, state);
+			if (state != 'pending') {
+				break;
+			}
+		}
+		if (index >= len) {
+			this.log.info('queue full');
+			return Promise.reject('queue full');
+		}
+		const pendingPromises = this.buildQueue.filter(async (p) => await promiseState(p) == 'pending');
+		this.buildQueue[index] = new Promise((resolve, reject) => {
+			Promise.all(pendingPromises).then((values) => {
+				this.log.info('start to build');
+				const cmd = this.config.get<string>('cscope');
+				const db = this.config.get<string>('database');
+				const buildArgs = this.config.get<string>('buildArgs');
+				const args = [buildArgs, '-f', db];
+				this.buildCmd = [cmd, ...args].join(' ');
+				this.log.info(cmd, args, cwd);
 
-			let out = '';
-			let err = '';
-			const proc = cp.spawn(cmd, args, { cwd: cwd });
-			proc.stdout.on('data', (data) => {
-				out = out.concat(data.toString());
-			});
-			proc.stderr.on('data', (data) => {
-				err = err.concat(data.toString());
-			});
-			proc.on('error', (error) => {
-				this.log.err('error:', error);
-				reject(error.toString().trim());
-			});
-			proc.on('close', (code) => {
-				if (err.length > 0) {
-					this.log.err(`stderr: ${code}\n${err}`);
-				}
-				this.log.info(`stdout: ${code}\n${out}`);
-				if (code != 0) {
-					reject(err.trim());
-				} else {
-					resolve(out.trim());
-				}
+				let out = '';
+				let err = '';
+				const proc = cp.spawn(cmd, args, { cwd: cwd });
+				proc.stdout.on('data', (data) => {
+					out = out.concat(data.toString());
+				});
+				proc.stderr.on('data', (data) => {
+					err = err.concat(data.toString());
+				});
+				proc.on('error', (error) => {
+					this.log.err('error:', error);
+					reject(error.toString().trim());
+				});
+				proc.on('close', (code) => {
+					if (err.length > 0) {
+						this.log.err(`stderr: ${code}\n${err}`);
+					}
+					this.log.info(`stdout: ${code}\n${out}`);
+					if (code != 0) {
+						this.log.info('done to build: error');
+						reject(err.trim());
+					} else {
+						this.log.info('done to build: success');
+						resolve(out.trim());
+					}
+				});
 			});
 		});
+		return this.buildQueue[index];
 	}
 
 	/**

@@ -256,7 +256,7 @@
 					},
 					"cscope-code.buildArgs": {
 						"type": "string",
-						"default": "-RbU",
+						"default": "-RbUq",
 						"description": "Arguments to build a cscope database."
 					},
 					"cscope-code.queryArgs": {

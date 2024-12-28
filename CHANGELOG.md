@@ -5,6 +5,9 @@ All notable changes to the "cscope-code" extension will be documented in this fi
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
 ## [Unreleased]
+### Fixed
+- Limit number of process to build the cscope database ([issue #18](https://github.com/SeungukShin/cscope-code/issues/18))
+
 ### Changed
 - Reveal the first item instead of the last item in TreeView
 
